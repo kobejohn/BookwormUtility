@@ -2,7 +2,7 @@
 BookwormUtility - Whomp them every time
 =======================================
 
-BookwormUtility (BU) works with the old (and good) game [Bookworm Adventures](http://store.steampowered.com/app/3470/)
+BookwormUtility (BU) works with the old (and good) game `Bookworm Adventures <http://store.steampowered.com/app/3470/>`_
 It uses simple image recognition to extract the current game from the screen
 and then simulates whichever game mode you are in (main game, or any of
 the mini-games) to maximize score etc.
@@ -34,10 +34,10 @@ Installation:
 Installation is ridiculous. I don't recommend it. Requires:
 
 - Py3 (not Py2)
-- windows
-- pywin32 (for access to the screen)
-- OpenCV 1.0 (yes, 1.0) (with the /bin folder added to path)
-- ctypes-opencv (for Py3 access to OpenCV)
+- windows (just because of the window grabbing technique)
+- `PyWin32 <http://sourceforge.net/projects/pywin32/files/?source=navbar>`_ (for access to the screen)
+- `OpenCV 1.0 <http://opencv.org/downloads.html>`_ (yes, 1.0) (with the /bin folder added to path)
+- `ctypes-opencv <https://code.google.com/p/ctypes-opencv/>`_ (for Py3 access to OpenCV)
 - make sure to set your environments TCL path to your Py3 TCL directory.
 - probably there is more that I can't remember
 
