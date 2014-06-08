@@ -2,10 +2,14 @@
 BookwormUtility - Whomp them every time
 =======================================
 
-BookwormUtility (BU) works with the old (and good) game `Bookworm Adventures <http://store.steampowered.com/app/3470/>`_
+BookwormUtility (BU) works with the old (and good) game
+`Bookworm Adventures <http://store.steampowered.com/app/3470/>`_.
 It uses simple image recognition to extract the current game from the screen
 and then simulates whichever game mode you are in (main game, or any of
 the mini-games) to maximize score etc.
+
+It doesn't just lookup words, it also identifies the status (unusable, plague,
+diamond, ruby, etc.) and maximizes the score based on all factors.
 
 It does not collect any internal game data through hooks etc. so it still has
 to work to figure out possibilities.
@@ -17,7 +21,15 @@ All the work was worth the sweet sweet revenge of "Whomped!" and
 "Annihilated!" etc. every time. You can basically win the game without
 losing once.
 
-.. youtube:: tbd
+Here is the post-game boss arena attempted with no potions. Almost made it.
+If you use potions, it's ridiculously easy.
+
+.. youtube:: http://youtu.be/Y6AzpKn7jTc
+
+Here is the mini-game Word Master. If I remember correctly, it can also handle
+the other mini-games.
+
+.. youtube:: http://youtu.be/YI7ZEUeZG98
 
 Background and Feedback:
 ========================
