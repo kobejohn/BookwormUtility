@@ -26,10 +26,14 @@ If you use potions, it's ridiculously easy.
 
 .. youtube:: http://youtu.be/Y6AzpKn7jTc
 
+- `Direct link in case embedded video doesn't work. <http://youtu.be/Y6AzpKn7jTc>`_
+
 Here is the mini-game Word Master. If I remember correctly, it can also handle
 the other mini-games.
 
 .. youtube:: http://youtu.be/YI7ZEUeZG98
+
+- `Direct link in case embedded video doesn't work. <http://youtu.be/YI7ZEUeZG98>`_
 
 Background and Feedback:
 ========================
