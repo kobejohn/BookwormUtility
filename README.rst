@@ -2,6 +2,9 @@
 BookwormUtility - Whomp them every time
 =======================================
 
+.. image:: https://github.com/kobejohn/BookwormUtility/raw/master/docs/title_screen.png
+   :width: 400 px
+
 BookwormUtility (BU) works with the old (and good) game
 `Bookworm Adventures <http://store.steampowered.com/app/3470/>`_.
 It uses simple image recognition to extract the current game from the screen
@@ -24,16 +27,14 @@ losing once.
 Here is the post-game boss arena attempted with no potions. Almost made it.
 If you use potions, it's ridiculously easy.
 
-.. youtube:: http://youtu.be/Y6AzpKn7jTc
-
-- `Direct link in case embedded video doesn't work. <http://youtu.be/Y6AzpKn7jTc>`_
+.. image:: https://github.com/kobejohn/BookwormUtility/raw/master/docs/battle.png
+   :target: http://youtu.be/Y6AzpKn7jTc
 
 Here is the mini-game Word Master. If I remember correctly, it can also handle
 the other mini-games.
 
-.. youtube:: http://youtu.be/YI7ZEUeZG98
-
-- `Direct link in case embedded video doesn't work. <http://youtu.be/YI7ZEUeZG98>`_
+.. image:: https://github.com/kobejohn/BookwormUtility/raw/master/docs/word_master.png
+   :target: http://youtu.be/YI7ZEUeZG98
 
 Background and Feedback:
 ========================
