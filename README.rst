@@ -53,8 +53,8 @@ Installation is ridiculous. I don't recommend it. Requires:
 - Py3 (not Py2)
 - windows (just because of the window grabbing technique)
 - `PyWin32 <http://sourceforge.net/projects/pywin32/files/?source=navbar>`_ (for access to the screen)
-- `OpenCV 1.0 <http://opencv.org/downloads.html>`_ (yes, 1.0) (with the /bin folder added to path)
-- `ctypes-opencv <https://code.google.com/p/ctypes-opencv/>`_ (for Py3 access to OpenCV)
+- `OpenCV 1.0 <https://sourceforge.net/projects/opencvlibrary/files/opencv-win/1.0/>`_ (yes, 1.0) (with the /bin folder added to path)
+- `ctypes-opencv <https://code.google.com/archive/p/ctypes-opencv/downloads/>`_ (for Py3 access to OpenCV)
 - make sure to set your environments TCL path to your Py3 TCL directory.
 - probably there is more that I can't remember
 
