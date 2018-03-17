@@ -45,18 +45,33 @@ This is one of the first projects I ever developed and so.... you really
 probably shouldn't go look at the code. I'm too afraid to look. I'm just
 sharing this for yuks and in case anyone can make use of some parts of it.
 
-Installation:
-=============
+Setup and Run:
+==============
 
-Installation is ridiculous. I don't recommend it. Requires:
+Get this repository
 
-- Py3 (not Py2)
-- windows (just because of the window grabbing technique)
-- `PyWin32 <http://sourceforge.net/projects/pywin32/files/?source=navbar>`_ (for access to the screen)
-- `OpenCV 1.0 <https://sourceforge.net/projects/opencvlibrary/files/opencv-win/1.0/>`_ (yes, 1.0) (with the /bin folder added to path)
-- `ctypes-opencv <https://code.google.com/archive/p/ctypes-opencv/downloads/>`_ (for Py3 access to OpenCV)
-- make sure to set your environments TCL path to your Py3 TCL directory.
-- probably there is more that I can't remember
+- [git for windows](https://git-scm.com/download/win) (add git commands to your path if it asks)
+- Open git-bash or powershell or whatever you want to use and confirm you can get some output from the command `git`
+- Go the directory where you want to put the repo. Probably something like `cd C:\Users\<your-account>`
+- `git clone https://github.com/kobejohn/BookwormUtility.git` (clones the repository to your computer)
+- `ls BookwormUtility` (check if you got the code etc. in the new directory)
+
+Get python and dependencies
+
+- [miniconda windows 64 bit](https://conda.io/miniconda.html) (this lets you manage python well on your PC - add conda commands to your path if it asks)
+- Open git-bash or powershell or whatever you want to use and confirm you can get some output from the command `conda`
+- We will just use the default python environment so you do not need to do anything like `conda env create ...` that you might see in the miniconda walkthrough.
+- `pip install pywin32` (this lets us get screen grabs in windows. it has a common python installer so we use `pip`)
+- `conda install opencv` (this lets us analyze screen grabs. it is more complicated to install so we use `conda`)
+
+Run it (good luck)
+
+- Run Bookworm Adventures in windowed mode
+- `cd <wherever>\BookwormUtility`
+- `python bookworm_utility.py`
+- whenever there is a word grid or a mini-game screen, click the appropriate button to get an analysis
+- confirm it is working by looking at the output in your terminal - you should see the correct tiles and statuses (smashed, locked, etc.)
+
 
 License:
 ========

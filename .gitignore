@@ -1,3 +1,5 @@
+wordtree.pickle
+
 *.py[co]
 
 # C extensions
