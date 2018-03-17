@@ -1,14 +1,18 @@
 from time import sleep
 import os.path
 
+import cv2 as cv
+import numpy as np
 import win32ui
 import win32gui
 import win32con
-from ctypes_opencv import *
 
 import flexframe
 import autoconfig
 
+HEIGHT = 0
+WIDTH = 1
+CHANNELS = 2
 ##    -pcnt_regions are defined in % from top left origin
 ##     and must be provided as a flexframe with the following item format:
 ##        {'top':%, 'left':%,'bottom':%, 'right':%}
@@ -103,26 +107,21 @@ class ImageToData:
                 td[name] = self._prepare_template(td['source'])
 
     def _identify(self, image, pcnt_region):
-        ROI = self._pcnt_region_to_ROI(image, pcnt_region)
-        cvSetImageROI(image, ROI)
+        left, top, width, height = self._pcnt_region_to_ROI(image, pcnt_region)
+        image = image[top:top+height, left:left+width]
         t_name = 'template_' + self.method
         # compare ROI to all templates
         all_comparisons = {index: 0 for index in self._templates_and_data.keys()}
         for index, td in self._templates_and_data.items():
             template = td[t_name] #get appropriate template image for method
-            w_result = ROI.width - template.width + 1
-            h_result = ROI.height - template.height + 1
-            result = cvCreateImage(CvSize(w_result, h_result),
-                                   IPL_DEPTH_32F, 1) #correlation "image"
-            minimum_loc = cvPoint(0,0)
-            maximum_loc = cvPoint(0,0)
-            cvMatchTemplate(image, template, result, CV_TM_SQDIFF)
-            minimum, maximum = cvMinMaxLoc(result,
-                                           min_loc = minimum_loc,
-                                           max_loc = maximum_loc)
-            all_comparisons[index] = minimum
-        index  = min(all_comparisons, key = all_comparisons.get)
-        cvResetImageROI(image)
+            w_result = image.shape[WIDTH] - template.shape[WIDTH] + 1
+            h_result = image.shape[HEIGHT] - template.shape[HEIGHT] + 1
+            # minimum_loc = cvPoint(0,0)
+            # maximum_loc = cvPoint(0,0)
+            result = cv.matchTemplate(image, template, cv.TM_SQDIFF)
+            min_val, max_val, min_loc, max_loc = cv.minMaxLoc(result)
+            all_comparisons[index] = min_val
+        index = min(all_comparisons, key=all_comparisons.get)
         return index
 
     def _pcnt_region_to_ROI(self, image, region):
@@ -130,23 +129,21 @@ class ImageToData:
         region is in top,left,bottom,right
         ROI must be a cvRect(left, top, width, height)
         """
-        left = int(round(image.width * region['left'] / 100))
-        width = int(round(image.width * (region['right'] - region['left']) / 100))
-        top = int(round(image.height * region['top'] / 100))
-        height = int(round(image.height * (region['bottom'] - region['top']) / 100))
-        return cvRect(left, top, width, height)
+        left = int(round(image.shape[WIDTH] * region['left'] / 100))
+        width = int(round(image.shape[WIDTH] * (region['right'] - region['left']) / 100))
+        top = int(round(image.shape[HEIGHT] * region['top'] / 100))
+        height = int(round(image.shape[HEIGHT] * (region['bottom'] - region['top']) / 100))
+        return left, top, width, height
 
 
     def _source_to_image(self, source):
         try:
-            source = source.encode('ascii')
-        except AttributeError:
-            pass
-        try:
             if os.path.isfile(source): #always start with 3 channel rgb
-                return cvLoadImage(source, CV_LOAD_IMAGE_COLOR)
+                return cv.imread(source, flags=cv.IMREAD_COLOR)
         except: pass # just safely testing for a path
         if hasattr(source, 'height'): #lame duck typing for iplimage
+            return source
+        if hasattr(source, 'shape'):  # test for numpy image
             return source
         return self._get_screenshot(source) #screenshot if nothing else works
 
@@ -168,33 +165,36 @@ class ImageToData:
         elif self.method == 'average color':
             result = self._convert_to_average_color(image)
         else:
-            ### someday... exception for no result to return
-            pass
+            raise RuntimeError('no method')
         return result
 
     def _convert_to_rgb(self, image):
         try:
-            image_BGR = cvCreateImage((image.width, image.height),
-                                      IPL_DEPTH_8U, 3)
-            cvConvertImage(image, image_BGR)
-            return image_BGR
+            return cv.cvtColor(image, cv.COLOR_BGRA2BGR)
         except:
-            pass ### someday... ###
+            pass
+        try:
+            return cv.cvtColor(image, cv.COLOR_GRAY2BGR)
+        except:
+            pass
+        raise RuntimeError('Unable to convert to rgb')
 
     def _convert_to_grayscale(self, image):
         try:
-            image_gray = cvCreateImage((image.width, image.height),
-                                        IPL_DEPTH_8U, 1)
-            cvConvertImage(image, image_gray)
-            return image_gray
+            return cv.cvtColor(image, cv.COLOR_BGR2GRAY)
         except:
-            pass ### someday... ###
-    
+            pass
+        try:
+            return cv.cvtColor(image, cv.COLOR_BGRA2GRAY)
+        except:
+            pass
+        raise RuntimeError('Unable to convert to grayscale')
+
     def _convert_to_average_color(self, image):
         image = self._convert_to_rgb(image)
-        avg = cvAvg(image) # found an easier, faster way... :)
-        avg_image = cvCreateImage((1, 1), image.depth, image.nChannels)
-        cvSet2D(avg_image, 0, 0, avg)
+        avg = np.average(image)
+        avg_image = np.zeros((1, 1, image.shape[CHANNELS]), image.dtype)
+        avg_image.fill(avg)
         return avg_image #return an image of the average color for consistency
 
     def _get_screenshot(self, window_title):
@@ -256,12 +256,9 @@ class ImageToData:
         file_path = 'tmp.bmp'
         bmp_scaled.SaveBitmapFile(scaledDC, file_path) ##why is a DC needed?
         ###################################################################
-
-        image_temp = cvLoadImage(file_path.encode('ascii')) #ultra lame using a file
-        image = cvCreateImage((image_temp.width, image_temp.height),
-                              image_temp.depth, 3) #remove alpha channel
-        cvCvtColor(image_temp, image, CV_BGRA2BGR)
-        return image 
+        image_temp = cv.imread(file_path)
+        os.remove(file_path)
+        return cv.cvtColor(image_temp, cv.COLOR_BGRA2BGR)
 
     def _get_hwnd(self, window_title):
         """ get a handle to the window """
@@ -271,13 +268,13 @@ class ImageToData:
         win32gui.EnumWindows(_window_callback, all_windows)
         if all_windows:
             hwnd = [hwnd for hwnd, title in all_windows
-                    if window_title.decode('ascii') in title]
+                    if window_title in title]
             if hwnd:
                 return hwnd[0]
         raise RuntimeError('window not found: ', window_title)
 
     def _crop_to_resolution(self, image):
-        if (image.width, image.height) in self.ac.get('crop','resolutions'):
+        if (image.shape[WIDTH], image.shape[HEIGHT]) in self.ac.get('crop','resolutions'):
             return image
 
 #        bad(?) trick: find the closest resolution with both
@@ -292,7 +289,7 @@ class ImageToData:
         closest_difference = large_number
         # find closest smaller width
         for res_width, res_height in self.ac.get('crop','resolutions'):
-            difference = image.width - res_width
+            difference = image.shape[WIDTH] - res_width
             if 0 <= difference < closest_difference:
                 closest_width = res_width
                 closest_difference = difference
@@ -302,62 +299,55 @@ class ImageToData:
                                 self.ac.get('crop','resolutions') if
                                 width == closest_width]
         for res_width, res_height in filtered_resolutions:
-            difference = image.height - res_height
+            difference = image.shape[HEIGHT] - res_height
             if 0 <= difference < closest_difference:
                 closest_height = res_height
                 closest_difference = difference
         # do nothing if no appropriate resolution found
         if (closest_width==large_number) or (closest_height==large_number):
             return image #if no resolution smaller/equal in both height/width
-        border = int(round((image.width - closest_width)/2))
-        top = image.height - closest_height - border
-        image_cropped = cvCreateImage((closest_width, closest_height),
-                                      image.depth, 3)
-        crop_rect = CvRect(border, top, closest_width, closest_height)
-        cvSetImageROI(image, crop_rect)
-        cvCopy(image, image_cropped)
-        cvResetImageROI(image)
+        border = int(round((image.shape[WIDTH] - closest_width)/2))
+        top = image.shape[HEIGHT] - closest_height - border
+        image_cropped = image[top:top+closest_height, border:border+closest_width]
         return image_cropped
 
     def _crop_to_4to3_aspect(self, image):
-        extra_width = image.width - image.height*4/3
+        extra_width = image.shape[WIDTH] - image.shape[HEIGHT]*4/3
         if extra_width <= 0:
             return image # stop if not widescreen
-        cropped_width = int(round(image.width - extra_width))
-        left_side = int(round((image.width - cropped_width)/2))
-        image_cropped = cvCreateImage((cropped_width, image.height),
-                                      image.depth, 3)
-        crop_rect = CvRect(left_side, 0, cropped_width, image.height)
-        cvSetImageROI(image, crop_rect)
-        cvCopy(image, image_cropped)
-        cvResetImageROI(image)
+        cropped_width = int(round(image.shape[WIDTH] - extra_width))
+        left_side = int(round((image.shape[WIDTH] - cropped_width)/2))
+        image_cropped = image[0:image.shape[HEIGHT], left_side:left_side+cropped_width]
         return image_cropped
 
     def _shrink_to_height(self, image):
-        if image.height <= self.shrink_to_height: return image
+        if image.shape[HEIGHT] <= self.shrink_to_height: return image
         new_height = self.shrink_to_height
-        new_width = int(round(new_height * image.width / image.height))
-        shrunk_image = cvCreateImage((new_width, new_height), image.depth, 3)
-        cvResize(image, shrunk_image, CV_INTER_AREA)
-        return shrunk_image
+        new_width = int(round(new_height * image.shape[WIDTH] / image.shape[HEIGHT]))
+        result = cv.resize(image, (new_height, new_width), interpolation=cv.INTER_AREA)
+
+
+        cv.namedWindow("asdf")
+        cv.imshow("asdf", result)
+        cv.waitKey(0)
+        cv.destroyAllWindows()
+
+
+
+        return result
 
 
 def _debug_display(image, title = 'debug display'):
-    try:
-        title = title.encode('ascii')
-    except AttributeError:
-        pass
-    if (image.width == 1) and (image.height == 1):
-        pixel = cvGet2D(image, 0, 0)
-        image = cvCreateImage((100, 100), IPL_DEPTH_8U, 3)
-        for x in range(0,100):
-            for y in range(0,100):
-                cvSet2D(image, x, y, pixel)
-    cvNamedWindow(title, CV_WINDOW_AUTOSIZE)
-    cvMoveWindow(title, 0, 0)
-    cvShowImage(title, image)
-    cvWaitKey()
-    cvDestroyWindow(title)
+    if (image.shape[WIDTH] == 1) and (image.shape[HEIGHT] == 1):
+        pixel = image[0, 0]
+        image = np.zeros((100, 100, 3), np.uint8)
+        image.fill(pixel)
+
+    cv.namedWindow(title)
+    cv.moveWindow(title, 0, 0)
+    cv.imshow(title, image)
+    cv.waitKey()
+    cv.destroyWindow(title)
 
 
 def main():

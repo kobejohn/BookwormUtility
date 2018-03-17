@@ -199,6 +199,7 @@ class BookwormUtility:
         if not num_words:
             num_words = self._ac.get('output','num solutions')
         tile_grid = self._get_tile_grid(grid_name, debug_path)
+        print('-' * 19)
         print(tile_grid)
         tiles = [tile for tile, position in tile_grid.nodes() if
                  tile.status != 'locked']
